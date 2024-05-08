@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const platosSchema = mongoose.Schema({
     nombre: {
         type: String,

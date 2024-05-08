@@ -1,14 +1,15 @@
 const mongoose = require('mongose');
 //Se crea un esquema para tener los pedidos, es decir los pedidos que cada persona tenga y su estado
 //Asi para poder utilizar un GET(Ver platos), POST(Pedir comida) y PUT/DELETE(Gestionar Pedidos)
-const pedidosSquema = new mongoose.Schema({
+const pedidosSquema = mongoose.Schema({
     usuario: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'usuarios'
+        ref: 'Usuario'
     },
     platos: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Platos' //Esto se cambiara luego para poner de referencia al esquema de los platos
+        ref: 'Platos',
+        default: null 
     }],
     estado: {
         type: String,

@@ -1,8 +1,8 @@
 const express = require('express');
 const routes = express.Router();
 const pedidos = require('../models/pedidosSchema');
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 //Se pone el token de validacion para que cualquiera que no este con la sesion iniciada no pueda entrar y pedir platos
 const verifyToken = require('./tokenValidacion');
 

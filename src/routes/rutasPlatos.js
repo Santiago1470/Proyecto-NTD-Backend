@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const platosSchema = require("../models/platosSchema");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const verifyToken = require("./tokenValidacion");
+const platosSchema = require('../models/platosSchema');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const verifyToken = require('./tokenValidacion');
 
 router.post("/platos", verifyToken, (req, res) => {
     let plato = platosSchema(req.body);
