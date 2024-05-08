@@ -9,7 +9,7 @@ const pedidosSquema = mongoose.Schema({
     platos: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Platos',
-        default: null 
+        default: []
     }],
     estado: {
         type: String,

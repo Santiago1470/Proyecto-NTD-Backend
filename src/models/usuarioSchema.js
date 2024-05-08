@@ -26,7 +26,7 @@ const usuarioSchema = mongoose.Schema({
     carrito:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Pedidos',
-        default: null
+        default: []
     } 
 })
 usuarioSchema.methods.encryptClave = async (contraseña) => {
