@@ -1,24 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const reservasSchema = require('../models/reservasSchema');
+const reservas = require('../models/reservasSchema');
 const verifyToken = require('./tokenValidacion');
 
 router.post("/reservas", verifyToken, (req, res) => {
-    let reserva = reservasSchema(req.body);
+    let reserva = reservas(req.body);
     reserva.save()
         .then((data) => res.json(data))
         .catch((error) => res.json({message: error}));
 });
 
 router.get("/reservas", (req, res) => {
-    reservasSchema.find()
+    reservas.find()
         .then((data) => res.json(data))
         .catch((error) => res.json({message: error}));
 });
 
 router.get("/reservas/:id", (req, res) => {
     const {id} = req.params;
-    reservasSchema.findById(id)
+    reservas.findById(id)
         .then((data) => res.json(data))
         .catch((error) => res.json({message: error}));
 });
@@ -26,7 +26,7 @@ router.get("/reservas/:id", (req, res) => {
 router.put("/reservas/:id", verifyToken, (req, res) => {
     const {id} = req.params;
     const {nombreCliente, numeroPersonas, mesa, fecha, hora, estado} = req.body;
-    reservasSchema.updateOne({_id: id}, {
+    reservas.updateOne({_id: id}, {
         $set: {nombreCliente, numeroPersonas, mesa, fecha, hora, estado}
     }).then((data) => res.json(data))
         .catch((data) => res.json({message: error}));
@@ -34,7 +34,7 @@ router.put("/reservas/:id", verifyToken, (req, res) => {
 
 router.delete("/reservas/:id", verifyToken, (req, res) => {
     const {id} = req.params;
-    reservasSchema.findByIdAndDelete(id)
+    reservas.findByIdAndDelete(id)
         .then((data) => res.json(data))
         .catch((error) => res.json({message: error}));
 });
