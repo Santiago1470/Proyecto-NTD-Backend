@@ -17,7 +17,7 @@ router.get("/carrito/:id", (req, res) => {
         .catch((error) => res.json({message: error}));
 });
 
-routes.post('/pedidos', verifyToken, (req, res) => {
+routes.post('/carrito', verifyToken, (req, res) => {
     let pedido = pedidos(req.body)
     pedido.save()
         .then((data) => res.json(data))
@@ -31,3 +31,10 @@ routes.put('/carrito/estado/:id', verifyToken, (req, res) => {
         .then((data) => res.json(data))
         .catch((error) => res.json({ message: error }))
 })
+
+router.delete("/carrito/:id", verifyToken, (req, res) => {
+    const {id} = req.params;
+    pedidos.findByIdAndDelete(id)
+        .then((data) => res.json(data))
+        .catch((error) => res.json({message: error}));
+});
