@@ -1,8 +1,6 @@
 const express = require('express');
 const routes = express.Router();
 const pedidos = require('../models/pedidosSchema');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 //Se pone el token de validacion para que cualquiera que no este con la sesion iniciada no pueda entrar y pedir platos
 const verifyToken = require('./tokenValidacion');
 
@@ -11,6 +9,13 @@ routes.get('/carrito', verifyToken, (req, res) => {
         .then((data) => res.json(data))
         .catch((error) => res.json({ message: error }))
 })
+
+router.get("/carrito/:id", (req, res) => {
+    const {id} = req.params;
+    pedidos.findById(id)
+        .then((data) => res.json(data))
+        .catch((error) => res.json({message: error}));
+});
 
 routes.post('/pedidos', verifyToken, (req, res) => {
     let pedido = pedidos(req.body)
