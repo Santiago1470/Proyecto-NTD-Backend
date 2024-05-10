@@ -25,9 +25,13 @@ const usuarioSchema = mongoose.Schema({
     },
     carrito:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pedidos',
-        default: []
-    } 
+        ref: 'Pedidos'
+    },
+    reservas:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Reservas',
+        default:[]
+    }
 })
 usuarioSchema.methods.encryptClave = async (contraseña) => {
     const salt = await bcrypt.genSalt(10);
