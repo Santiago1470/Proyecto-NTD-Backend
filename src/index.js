@@ -11,6 +11,8 @@ app.use(parser.urlencoded({extended: false}));  // permite leer los datos que vi
 app.use(parser.json()); // transforma los datos a formato JSON
 // Gestión de las rutas usando el middleware
 app.use("/api", platosRoutes);
+
+app.use(express.json());
 // Conexión a base de datos
 // mongoose
 //     .connect(process.env.MONGODB_URI)
