@@ -5,7 +5,7 @@ const pedidos = require('../models/pedidosSchema');
 const verifyToken = require('./tokenValidacion');
 const { default: mongoose } = require('mongoose');
 
-router.get('/carrito', verifyToken, (req, res) => {
+router.get('/carrito/:usuarioId', verifyToken, (req, res) => {
     pedidos.find()
         .then((data) => res.json(data))
         .catch((error) => res.json({ message: error }))
