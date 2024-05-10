@@ -10,15 +10,18 @@ const reservasSchema = mongoose.Schema({
     },
     mesa: {
         type: Number,
-        required: true
+        required: true,
+        max: 20
     },
     fecha: {
         type: Date,
-        required: true
+        required: true, 
+        unique: true
     },
     hora: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     estado: {
         type: String,
