@@ -5,12 +5,14 @@ const parser = require("body-parser");
 const mongoose = require("mongoose");
 // Routers
 const platosRoutes = require("./routes/rutasPlatos");
+const reservasRoutes = require("./routes/rutasReservas");
 
 require("dotenv").config();
 app.use(parser.urlencoded({extended: false}));  // permite leer los datos que vienen en la petición
 app.use(parser.json()); // transforma los datos a formato JSON
 // Gestión de las rutas usando el middleware
 app.use("/api", platosRoutes);
+app.use("/api", reservasRoutes);
 
 app.use(express.json());
 
