@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const platos = require('../models/platosSchema');
 const verifyToken = require('./tokenValidacion');
-const admin = require('./administrador')
+const admin = require('./administrador');
 
 router.post("/platos", verifyToken, admin, (req, res) => {
     let plato = platosSchema(req.body);

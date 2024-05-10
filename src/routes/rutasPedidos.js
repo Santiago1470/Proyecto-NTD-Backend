@@ -8,7 +8,7 @@ const { default: mongoose } = require('mongoose');
 //GEt para los platos pedidos por un usuario con el webtoken
 router.get('/carrito', verifyToken, (req, res) => {
     const usuarioId = req.userId;
-    pedidos.find({ usuario: usuarioId }).populate('platos')
+    pedidos.find({ usuario: usuarioId }).populate('Platos')
         .then((data) => res.json(data))
         .catch((error) => res.json({ message: error }))
 })
