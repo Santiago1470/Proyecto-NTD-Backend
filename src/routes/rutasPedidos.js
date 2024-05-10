@@ -8,7 +8,6 @@ const { default: mongoose } = require('mongoose');
 //GEt para los platos pedidos por un usuario con el webtoken
 router.get('/carrito', verifyToken, (req, res) => {
     const usuarioId = req.userId;
-    const pedido = { userID: usuarioId };
     pedidos.find({ usuario: usuarioId }).populate('platos')
         .then((data) => res.json(data))
         .catch((error) => res.json({ message: error }))
@@ -21,23 +20,45 @@ router.get("/carrito", (req, res) => {
 });
 
 router.post('/carrito/', verifyToken, (req, res) => {
-    let {platoId, estado} = req.body
-    const plato =  platos.findById(platoId)
-        .then(
-            pedidos.platos.push(platoId),
-             pedidos.save()
-                .then((data) => res.json(data))
-                .catch((error) => res.json({ message: "No se pudo almacenar el plato" }))
-        )
-        .catch((error) => res.json({ message: "No existe ese plato" }))
+    let { platoId, estado } = req.body
+    const plato = platos.findById(platoId)
+    if (plato) {
+        pedidos.platos.push({ plato: platoId, estado });
+        pedidos.save()
+            .then((data) => res.json(data))
+            .catch((error) => res.json({ message: error }));
+    }else {
+        res.status(404).json({ message: "No existe ese plato" });
+    }
 });
 
 
-router.delete("/carrito/:id", verifyToken, (req, res) => {
-    const { id } = req.params;
-    pedidos.findByIdAndDelete(id)
-        .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
+router.delete('/carrito/:platoId', verifyToken, (req, res) => {
+    const platoId = req.params.platoId;
+    const platoIndex = pedidos.platos.findIndex(plato => plato.plato == platoId);
+    if (platoIndex !== -1) {
+        pedidos.platos.splice(platoIndex, 1);
+        pedidos.save()
+            .then((data) => res.json(data))
+            .catch((error) => res.json({ message: error }));
+    } else {
+        res.status(404).json({ message: "El plato no se encontró en el carrito" });
+    }
+});
+
+router.put('/carrito/:platoId', verifyToken, (req, res) => {
+    const platoId = req.params.platoId;
+    const nuevoEstado = req.body.estado;
+
+    const platoIndex = pedidos.platos.findIndex(plato => plato.plato == platoId);
+    if (platoIndex !== -1) {
+        pedidos.platos[platoIndex].estado = nuevoEstado;
+        pedidos.save()
+            .then((data) => res.json(data))
+            .catch((error) => res.json({ message: error }));
+    } else {
+        res.status(404).json({ message: "El plato no se encontró en el carrito" });
+    }
 });
 
 module.exports = router;
