@@ -13,11 +13,11 @@ app.use(parser.json()); // transforma los datos a formato JSON
 app.use("/api", platosRoutes);
 
 app.use(express.json());
+
 // Conexión a base de datos
-// mongoose
-//     .connect(process.env.MONGODB_URI)
-//     .then(() => console.log("Conexión exitosa"))
-//     .catch((error) => console.log(error));
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log("Conexión exitosa."))
+    .catch((error)=> console.log(error));
 
 // Conexión al puerto
 app.listen(PORT, () => {
