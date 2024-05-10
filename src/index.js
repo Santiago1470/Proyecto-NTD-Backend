@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 3000;
 const parser = require("body-parser");
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 // Routers
 
 // const mongoose = require("mongoose");
