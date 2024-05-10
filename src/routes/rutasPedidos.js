@@ -18,7 +18,7 @@ router.get("/carrito", (req, res) => {
         .then((data) => res.json(data))
         .catch((error) => res.json({ message: error }));
 });
-
+//Aqui el estado y plato se ponen el el body
 router.post('/carrito/', verifyToken, (req, res) => {
     let { platoId, estado } = req.body
     const plato = platos.findById(platoId)
@@ -32,7 +32,7 @@ router.post('/carrito/', verifyToken, (req, res) => {
     }
 });
 
-
+//Elimina el plato del carrito, mediante el id del plato que ya haya sido ingresado
 router.delete('/carrito/:platoId', verifyToken, (req, res) => {
     const platoId = req.params.platoId;
     const platoIndex = pedidos.platos.findIndex(plato => plato.plato == platoId);
@@ -45,7 +45,7 @@ router.delete('/carrito/:platoId', verifyToken, (req, res) => {
         res.status(404).json({ message: "El plato no se encontró en el carrito" });
     }
 });
-
+//Solo cambia el estado del plato, por lo que no cambia ni el plato ni el usuario
 router.put('/carrito/:platoId', verifyToken, (req, res) => {
     const platoId = req.params.platoId;
     const nuevoEstado = req.body.estado;

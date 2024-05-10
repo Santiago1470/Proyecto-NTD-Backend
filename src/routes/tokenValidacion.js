@@ -1,4 +1,4 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const verifyToken = (req, res, next) => {
     const token = req.header('access-token')
     if (!token) return res.status(401).json({ error: '¡Lo sentimos!, debes iniciar sesion para realizar la opción.' })
