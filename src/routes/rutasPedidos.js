@@ -20,12 +20,12 @@ router.get("/carrito", (req, res) => {
         .catch((error) => res.json({ message: error }));
 });
 
-router.post('/carrito/:idPlato', verifyToken, (req, res) => {
-    let platoId = req.params.idPlato
-    const plato = platos.findById(platoId)
+router.post('/carrito/', verifyToken, (req, res) => {
+    let {platoId, estado} = req.body
+    const plato =  platos.findById(platoId)
         .then(
             pedidos.platos.push(platoId),
-            pedidos.save()
+             pedidos.save()
                 .then((data) => res.json(data))
                 .catch((error) => res.json({ message: "No se pudo almacenar el plato" }))
         )
