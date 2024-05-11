@@ -34,10 +34,11 @@ router.get('/carrito', admin, async (req, res) => {
 
 // Agregar un pedido al carrito del usuario
 router.post('/carrito/agregar', verifyToken, async (req, res) => {
-    const usuarioId = req.user;
+    const {id} = req.user;
     const { platos } = req.body;
+    
     try {
-        const user = await usuarios.findById(usuarioId._id);
+        const user = await usuarios.findById(id);
         if (!user) {
             return res.status(404).json({ error: 'El usuario no existe' });
         }
@@ -47,7 +48,7 @@ router.post('/carrito/agregar', verifyToken, async (req, res) => {
             return res.status(404).json({ error: 'Algunos platos no existen' });
         }
         const pedido = pedidos({
-            usuario: usuarioId._id,
+            usuario: id,
             platos: platos.map(({ plato, estado }) => ({ plato, estado }))
         });
         await pedido.save();
