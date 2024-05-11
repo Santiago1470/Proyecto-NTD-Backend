@@ -16,7 +16,7 @@ router.post("/signup", async (req, res) => {
     });
     user.contraseña = await user.encryptClave(user.contraseña);
     await user.save();
-    const token = jwt.sign({ id: user._id }, process.env.SECRET);
+    const token = jwt.sign({ id: user._id, rol: user.rol }, process.env.SECRET);
     res.json({
         auth: true,
         token,
@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
     const user = await usuarios.findOne({ usuario: req.body.usuario });
     if (!user) return res.status(400).json({ error: "Usuario no encontrado" });
     const validPassword = await bcrypt.compare(req.body.contraseña, user.contraseña);
-    const token = jwt.sign({ _id: usuarios._id, usuario: usuarios.usuario, rol: usuarios.rol }, process.env.SECRET)
+    const token = jwt.sign({ _id: req.body._id, rol: req.body.rol }, process.env.SECRET)
     if (!validPassword)
         return res.status(400).json({ error: "Clave no válida" });
     res.json({
@@ -41,7 +41,7 @@ router.post("/login", async (req, res) => {
 router.get('/getUsers', async (req, res) => {
     try {
         const usuario = await usuarios.find();
-        
+
         res.json(usuario);
     } catch (error) {
         console.error(error);

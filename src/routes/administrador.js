@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const admin = async (req, res, next) => {
     const token = req.header('access-token');
     if (!token) return res.status(401).json({ error: '¡Lo sentimos!, debes iniciar sesión para realizar la opción.' });

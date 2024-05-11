@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pedidos = require('../models/pedidosSchema');
 const usuarios = require('../models/usuarioSchema');
-const platos = require('../models/platosSchema');
+const platosSchema = require('../models/platosSchema');
 const verifyToken = require('./tokenValidacion');
 
 
@@ -28,24 +28,24 @@ router.get('/carrito', verifyToken, async (req, res) => {
 
 // Agregar un pedido al carrito del usuario
 router.post('/carrito/agregar', verifyToken, async (req, res) => {
-    const { usuarioId, platos } = req.body;
+    const { usuario, platos } = req.body;
     try {
-        const usuario = await usuarios.findById(usuarioId);
-        if (!usuario) {
+        const user = await usuarios.findById(usuario);
+        if (!user) {
             return res.status(404).json({ error: 'El usuario no existe' });
         }
         const platosIds = platos.map(plato => plato.plato);
-        const platosExisten = await platos.find({ _id: { $in: platosIds } });
-        if (platosExisten.length !== platos.length) {
+        const platosExistenCount = await platosSchema.countDocuments({ _id: { $in: platosIds } });
+        if (platosExistenCount !== platosIds.length) {
             return res.status(404).json({ error: 'Algunos platos no existen' });
         }
-        const pedido = new pedidos({
-            usuario: usuarioId,
+        const pedido = pedidos({
+            usuario: usuario,
             platos: platos.map(({ plato, estado }) => ({ plato, estado }))
         });
-        const nuevoPedido = await pedido.save();
-        usuario.carrito.push(nuevoPedido._id);
-        await usuario.save();
+        await pedido.save();
+        user.carrito.push(pedido._id);
+        await user.save();
         res.status(200).json({ message: 'Pedido agregado al carrito correctamente' });
     } catch (error) {
         res.status(500).json({ error: 'Error al agregar el pedido al carrito' });
@@ -61,7 +61,7 @@ router.delete('/carrito/:pedidoId/plato/:platoId', verifyToken, async (req, res)
         if (!pedido) {
             return res.status(404).json({ error: 'El pedido no existe' });
         }
-        const platoIndex = pedido.platos.findIndex(plato => plato.plato == platoId);
+        const platoIndex = pedido.platos.findIndex(plato => plato.plato.equals(platoId));
         if (platoIndex !== -1) {
             pedido.platos.splice(platoIndex, 1);
             await pedido.save();
@@ -74,6 +74,7 @@ router.delete('/carrito/:pedidoId/plato/:platoId', verifyToken, async (req, res)
     }
 });
 
+
 // Actualizar el estado de un plato en el carrito del usuario
 router.put('/carrito/:pedidoId/plato/:platoId', verifyToken, async (req, res) => {
     const pedidoId = req.params.pedidoId;
@@ -84,7 +85,7 @@ router.put('/carrito/:pedidoId/plato/:platoId', verifyToken, async (req, res) =>
         if (!pedido) {
             return res.status(404).json({ error: 'El pedido no existe' });
         }
-        const plato = pedido.platos.find(plato => plato.plato == platoId);
+        const plato = pedido.platos.find(plato => plato.plato.equals(platoId));
         if (plato) {
             plato.estado = nuevoEstado;
             await pedido.save();

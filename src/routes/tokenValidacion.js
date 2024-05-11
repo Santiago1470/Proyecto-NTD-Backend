@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const user = require('../models/usuarioSchema');
 const verifyToken = async (req, res, next) => {
     const token = req.header('access-token');
     if (!token) return res.status(401).json({ error: '¡Lo sentimos!, debes iniciar sesión para realizar la opción.' });
@@ -11,4 +10,5 @@ const verifyToken = async (req, res, next) => {
         res.status(400).json({ error: 'El token no es válido' });
     }
 }
+
 module.exports = verifyToken;

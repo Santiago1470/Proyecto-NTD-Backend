@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const platos = require('../models/platosSchema');
 const admin = require('./administrador');
+const token = require('./tokenValidacion')
 
-router.post("/platos", admin, (req, res) => {
-    const plato =  platos(req.body); 
+router.post("/platos", token, admin, (req, res) => {
+    const plato = platos(req.body);
     plato.save()
         .then((data) => res.json(data))
         .catch((error) => {
@@ -25,7 +26,7 @@ router.get("/platos/:id", (req, res) => {
         .catch((error) => res.json({ message: error }));
 });
 
-router.put("/platos/:id", admin, (req, res) => {
+router.put("/platos/:id", token, admin, (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, categoria, ingredientes, imagen } = req.body;
     platos.updateOne({ _id: id }, {
@@ -34,7 +35,7 @@ router.put("/platos/:id", admin, (req, res) => {
         .catch((data) => res.json({ message: error }));
 });
 
-router.delete("/platos/:id", admin,(req, res) => {
+router.delete("/platos/:id", token, admin, (req, res) => {
     const { id } = req.params;
     platos.findByIdAndDelete(id)
         .then((data) => res.json(data))

@@ -9,8 +9,7 @@ const pedidosSquema = mongoose.Schema({
     platos: {
         type: [{
             plato: {
-                type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Platos' }],
-                default: []
+                type: { type: mongoose.Schema.Types.ObjectId, ref: 'Platos' },
             },
             estado: {
                 type: String,
