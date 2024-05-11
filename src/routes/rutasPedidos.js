@@ -9,13 +9,8 @@ const admin = require('./administrador');
 
 router.get('/carrito/mis-pedidos', verifyToken, async (req, res) => {
     const usuarioId = req.user;
-    console.log(usuarioId._id)
     try {
-        const misPedidos = await pedidos.find({ usuario: usuarioId._id }).populate({
-            path: 'platos',
-            model: platosSchema,
-            select: 'nombre'
-        }).exec();
+        const misPedidos = await pedidos.find({ usuario: usuarioId._id }).populate('platos').exec();
         res.json(misPedidos);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener los pedidos del usuario' });
@@ -25,11 +20,7 @@ router.get('/carrito/mis-pedidos', verifyToken, async (req, res) => {
 // Obtener todos los pedidos (para administradores)
 router.get('/carrito', admin, async (req, res) => {
     try {
-        const todosPedidos = await pedidos.find().populate({
-            path: 'platos',
-            model: platosSchema,
-            select: 'nombre'
-        }).exec();
+        const todosPedidos = await pedidos.find().populate('platos').exec();
         if (todosPedidos.length === 0) {
             res.status(404).json({ error: 'No hay pedidos encontrados' });
         } else {
@@ -43,9 +34,10 @@ router.get('/carrito', admin, async (req, res) => {
 
 // Agregar un pedido al carrito del usuario
 router.post('/carrito/agregar', verifyToken, async (req, res) => {
-    const { usuario, platos } = req.body;
+    const usuarioId = req.user;
+    const { platos } = req.body;
     try {
-        const user = await usuarios.findById(usuario);
+        const user = await usuarios.findById(usuarioId._id);
         if (!user) {
             return res.status(404).json({ error: 'El usuario no existe' });
         }
@@ -55,7 +47,7 @@ router.post('/carrito/agregar', verifyToken, async (req, res) => {
             return res.status(404).json({ error: 'Algunos platos no existen' });
         }
         const pedido = pedidos({
-            usuario: usuario,
+            usuario: usuarioId._id,
             platos: platos.map(({ plato, estado }) => ({ plato, estado }))
         });
         await pedido.save();
