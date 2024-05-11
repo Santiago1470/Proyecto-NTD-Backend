@@ -4,6 +4,7 @@ const pedidos = require('../models/pedidosSchema');
 const usuarios = require('../models/usuarioSchema');
 const platosSchema = require('../models/platosSchema');
 const verifyToken = require('./tokenValidacion');
+const admin = require('./administrador');
 
 
 router.get('/carrito/mis-pedidos', verifyToken, async (req, res) => {
@@ -22,21 +23,19 @@ router.get('/carrito/mis-pedidos', verifyToken, async (req, res) => {
 });
 
 // Obtener todos los pedidos (para administradores)
-router.get('/carrito', verifyToken, async (req, res) => {
+router.get('/carrito', admin, async (req, res) => {
     try {
         const todosPedidos = await pedidos.find().populate({
             path: 'platos',
             model: platosSchema,
             select: 'nombre'
         }).exec();
-        
         if (todosPedidos.length === 0) {
             res.status(404).json({ error: 'No hay pedidos encontrados' });
         } else {
             res.json(todosPedidos);
         }
     } catch (error) {
-        console.error('Error al obtener todos los pedidos:', error);
         res.status(500).json({ error: 'Error al obtener todos los pedidos' });
     }
 });
