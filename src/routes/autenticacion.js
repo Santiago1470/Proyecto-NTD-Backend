@@ -28,7 +28,7 @@ router.post("/login", async (req, res) => {
     const user = await usuarios.findOne({ usuario: req.body.usuario });
     if (!user) return res.status(400).json({ error: "Usuario no encontrado" });
     const validPassword = await bcrypt.compare(req.body.contraseña, user.contraseña);
-    const token = jwt.sign({ _id: req.body._id, rol: req.body.rol }, process.env.SECRET)
+    const token = jwt.sign({ _id: user._id, rol: user.rol }, process.env.SECRET)
     if (!validPassword)
         return res.status(400).json({ error: "Clave no válida" });
     res.json({

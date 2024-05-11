@@ -26,6 +26,7 @@ const usuarioSchema = mongoose.Schema({
     },
     carrito:{
         type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Pedidos' }],
+        max: 1,
         default: []
     },
     reservas:{

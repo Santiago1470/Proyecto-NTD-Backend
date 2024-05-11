@@ -14,7 +14,7 @@ const pedidosSquema = mongoose.Schema({
             estado: {
                 type: String,
                 enum: ['Plato en preparación', 'Plato en camino', 'Plato entregado'],
-                require: true
+                required: true
             }
         }]
     }

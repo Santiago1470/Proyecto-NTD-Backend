@@ -7,9 +7,14 @@ const verifyToken = require('./tokenValidacion');
 
 
 router.get('/carrito/mis-pedidos', verifyToken, async (req, res) => {
-    const usuarioId = req.userId;
+    const usuarioId = req.user;
+    console.log(usuarioId._id)
     try {
-        const misPedidos = await pedidos.find({ usuario: usuarioId }).populate('platos');
+        const misPedidos = await pedidos.find({ usuario: usuarioId._id }).populate({
+            path: 'platos',
+            model: platosSchema,
+            select: 'nombre'
+        }).exec();
         res.json(misPedidos);
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener los pedidos del usuario' });
@@ -19,12 +24,23 @@ router.get('/carrito/mis-pedidos', verifyToken, async (req, res) => {
 // Obtener todos los pedidos (para administradores)
 router.get('/carrito', verifyToken, async (req, res) => {
     try {
-        const todosPedidos = await pedidos.find().populate('platos');
-        res.json(todosPedidos);
+        const todosPedidos = await pedidos.find().populate({
+            path: 'platos',
+            model: platosSchema,
+            select: 'nombre'
+        }).exec();
+        
+        if (todosPedidos.length === 0) {
+            res.status(404).json({ error: 'No hay pedidos encontrados' });
+        } else {
+            res.json(todosPedidos);
+        }
     } catch (error) {
+        console.error('Error al obtener todos los pedidos:', error);
         res.status(500).json({ error: 'Error al obtener todos los pedidos' });
     }
 });
+
 
 // Agregar un pedido al carrito del usuario
 router.post('/carrito/agregar', verifyToken, async (req, res) => {
