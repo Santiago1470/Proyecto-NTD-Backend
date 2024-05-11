@@ -21,7 +21,7 @@ app.use("/Ciprianis", autenticacion)
 app.use(express.json());
 
 // Conexión a base de datos
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URL)
     .then(() => console.log("Conexión exitosa."))
     .catch((error)=> console.log(error));
 

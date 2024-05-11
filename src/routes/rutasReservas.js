@@ -2,35 +2,46 @@ const express = require('express');
 const router = express.Router();
 const reservas = require('../models/reservasSchema');
 const verifyToken = require('./tokenValidacion');
-const admin = require('./administrador');
+const usuarios = require('../models/usuarioSchema');
 
-router.post("/reservas", verifyToken, (req, res) => {
-    let reserva = reservas(req.body);
-    reserva.save()
-        .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
-});
-//Del usuario al cual ha iniciado sesion
-router.get("/reservas", verifyToken, (req, res) => {
-    const usuarioId = req.userId;
-    pedidos.find({ usuario: usuarioId }).populate('Reservas')
-        .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
+router.post("/reservas", verifyToken, async (req, res) => {
+    const { usuarioId } = req.body;
+    const reserva = new reservas(req.body);
+    try {
+        const usuario = await usuarios.findById(usuarioId);
+        if (!usuario) {
+            return res.status(404).json({ error: 'El usuario no existe' });
+        }
+        usuario.reservas.push(reserva._id);
+        await usuario.save();
+        const ReservaNueva = await reserva.save();
+        res.json(ReservaNueva);
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
 });
 
-//Todas las reservas disponibles de todos los usuarios
-router.get("/reservas", admin, (req, res) => {
+router.get("/reservas/:userId", verifyToken, async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const reservasUsuario = await reservas.find({ usuario: userId }).populate('usuario');
+        res.json(reservasUsuario);
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
+});
+
+router.get("/reservas", (req, res) => {
     reservas.find()
         .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
+        .catch((error) => res.status(500).json({ message: error }));
 });
 
-//Debe tener el token de validación puesto que eso es por cada usuario 
 router.get("/reservas/:id", verifyToken, (req, res) => {
     const { id } = req.params;
     reservas.findById(id)
         .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
+        .catch((error) => res.status(500).json({ message: error }));
 });
 
 router.put("/reservas/:id", verifyToken, (req, res) => {
@@ -39,14 +50,14 @@ router.put("/reservas/:id", verifyToken, (req, res) => {
     reservas.updateOne({ _id: id }, {
         $set: { nombreCliente, numeroPersonas, mesa, fecha, hora, estado }
     }).then((data) => res.json(data))
-        .catch((data) => res.json({ message: error }));
+        .catch((error) => res.status(500).json({ message: error }));
 });
 
 router.delete("/reservas/:id", verifyToken, (req, res) => {
     const { id } = req.params;
     reservas.findByIdAndDelete(id)
         .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
+        .catch((error) => res.status(500).json({ message: error }));
 });
 
 module.exports = router;

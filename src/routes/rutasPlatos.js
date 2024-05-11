@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const platos = require('../models/platosSchema');
-const verifyToken = require('./tokenValidacion');
 const admin = require('./administrador');
 
-router.post("/platos", verifyToken, admin, (req, res) => {
-    let plato = platosSchema(req.body);
+router.post("/platos", admin, (req, res) => {
+    const plato =  platos(req.body); 
     plato.save()
         .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
+        .catch((error) => {
+            res.status(500).json({ error: "Error al guardar el plato en la base de datos" });
+        });
 });
 
 router.get("/platos", (req, res) => {
@@ -24,7 +25,7 @@ router.get("/platos/:id", (req, res) => {
         .catch((error) => res.json({ message: error }));
 });
 
-router.put("/platos/:id", verifyToken, admin, (req, res) => {
+router.put("/platos/:id", admin, (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio, categoria, ingredientes, imagen } = req.body;
     platos.updateOne({ _id: id }, {
@@ -33,7 +34,7 @@ router.put("/platos/:id", verifyToken, admin, (req, res) => {
         .catch((data) => res.json({ message: error }));
 });
 
-router.delete("/platos/:id", verifyToken, admin, (req, res) => {
+router.delete("/platos/:id", admin,(req, res) => {
     const { id } = req.params;
     platos.findByIdAndDelete(id)
         .then((data) => res.json(data))

@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const reservasSchema = mongoose.Schema({
     nombreCliente: {
-        type: String,
-        required: true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario'
     },
     numeroPersonas: {
         type: Number,

@@ -1,64 +1,99 @@
 const express = require('express');
 const router = express.Router();
 const pedidos = require('../models/pedidosSchema');
+const usuarios = require('../models/usuarioSchema');
 const platos = require('../models/platosSchema');
-//Se pone el token de validacion para que cualquiera que no este con la sesion iniciada no pueda entrar y pedir platos
 const verifyToken = require('./tokenValidacion');
-const { default: mongoose } = require('mongoose');
-//GEt para los platos pedidos por un usuario con el webtoken
-router.get('/carrito', verifyToken, (req, res) => {
+
+
+router.get('/carrito/mis-pedidos', verifyToken, async (req, res) => {
     const usuarioId = req.userId;
-    pedidos.find({ usuario: usuarioId }).populate('Platos')
-        .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }))
-})
-//GET para todos los pedidos que existan independiente del usuario
-router.get("/carrito", (req, res) => {
-    pedidos.find()
-        .then((data) => res.json(data))
-        .catch((error) => res.json({ message: error }));
-});
-//Aqui el estado y plato se ponen el el body
-router.post('/carrito/', verifyToken, (req, res) => {
-    let { platoId, estado } = req.body
-    const plato = platos.findById(platoId)
-    if (plato) {
-        pedidos.platos.push({ plato: platoId, estado });
-        pedidos.save()
-            .then((data) => res.json(data))
-            .catch((error) => res.json({ message: error }));
-    }else {
-        res.status(404).json({ message: "No existe ese plato" });
+    try {
+        const misPedidos = await pedidos.find({ usuario: usuarioId }).populate('platos');
+        res.json(misPedidos);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener los pedidos del usuario' });
     }
 });
 
-//Elimina el plato del carrito, mediante el id del plato que ya haya sido ingresado
-router.delete('/carrito/:platoId', verifyToken, (req, res) => {
-    const platoId = req.params.platoId;
-    const platoIndex = pedidos.platos.findIndex(plato => plato.plato == platoId);
-    if (platoIndex !== -1) {
-        pedidos.platos.splice(platoIndex, 1);
-        pedidos.save()
-            .then((data) => res.json(data))
-            .catch((error) => res.json({ message: error }));
-    } else {
-        res.status(404).json({ message: "El plato no se encontró en el carrito" });
+// Obtener todos los pedidos (para administradores)
+router.get('/carrito', verifyToken, async (req, res) => {
+    try {
+        const todosPedidos = await pedidos.find().populate('platos');
+        res.json(todosPedidos);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener todos los pedidos' });
     }
 });
-//Solo cambia el estado del plato, por lo que no cambia ni el plato ni el usuario
-router.put('/carrito/:platoId', verifyToken, (req, res) => {
+
+// Agregar un pedido al carrito del usuario
+router.post('/carrito/agregar', verifyToken, async (req, res) => {
+    const { usuarioId, platos } = req.body;
+    try {
+        const usuario = await usuarios.findById(usuarioId);
+        if (!usuario) {
+            return res.status(404).json({ error: 'El usuario no existe' });
+        }
+        const platosIds = platos.map(plato => plato.plato);
+        const platosExisten = await platos.find({ _id: { $in: platosIds } });
+        if (platosExisten.length !== platos.length) {
+            return res.status(404).json({ error: 'Algunos platos no existen' });
+        }
+        const pedido = new pedidos({
+            usuario: usuarioId,
+            platos: platos.map(({ plato, estado }) => ({ plato, estado }))
+        });
+        const nuevoPedido = await pedido.save();
+        usuario.carrito.push(nuevoPedido._id);
+        await usuario.save();
+        res.status(200).json({ message: 'Pedido agregado al carrito correctamente' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al agregar el pedido al carrito' });
+    }
+});
+
+// Eliminar un plato del carrito del usuario
+router.delete('/carrito/:pedidoId/plato/:platoId', verifyToken, async (req, res) => {
+    const pedidoId = req.params.pedidoId;
+    const platoId = req.params.platoId;
+    try {
+        const pedido = await pedidos.findById(pedidoId);
+        if (!pedido) {
+            return res.status(404).json({ error: 'El pedido no existe' });
+        }
+        const platoIndex = pedido.platos.findIndex(plato => plato.plato == platoId);
+        if (platoIndex !== -1) {
+            pedido.platos.splice(platoIndex, 1);
+            await pedido.save();
+            res.json(pedido);
+        } else {
+            res.status(404).json({ message: "El plato no se encontró en el carrito" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Error al eliminar el plato del carrito' });
+    }
+});
+
+// Actualizar el estado de un plato en el carrito del usuario
+router.put('/carrito/:pedidoId/plato/:platoId', verifyToken, async (req, res) => {
+    const pedidoId = req.params.pedidoId;
     const platoId = req.params.platoId;
     const nuevoEstado = req.body.estado;
-
-    const platoIndex = pedidos.platos.findIndex(plato => plato.plato == platoId);
-    if (platoIndex !== -1) {
-        pedidos.platos[platoIndex].estado = nuevoEstado;
-        pedidos.save()
-            .then((data) => res.json(data))
-            .catch((error) => res.json({ message: error }));
-    } else {
-        res.status(404).json({ message: "El plato no se encontró en el carrito" });
+    try {
+        const pedido = await pedidos.findById(pedidoId);
+        if (!pedido) {
+            return res.status(404).json({ error: 'El pedido no existe' });
+        }
+        const plato = pedido.platos.find(plato => plato.plato == platoId);
+        if (plato) {
+            plato.estado = nuevoEstado;
+            await pedido.save();
+            res.json(pedido);
+        } else {
+            res.status(404).json({ message: "El plato no se encontró en el carrito" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Error al actualizar el estado del plato en el carrito' });
     }
 });
-
 module.exports = router;

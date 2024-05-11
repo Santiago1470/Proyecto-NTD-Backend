@@ -25,13 +25,12 @@ const usuarioSchema = mongoose.Schema({
         required: true
     },
     carrito:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Pedidos'
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Pedidos' }],
+        default: []
     },
     reservas:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reservas',
-        default:[]
+        type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reservas' }],
+        default: []
     }
 })
 usuarioSchema.methods.encryptClave = async (contraseña) => {
